@@ -1,0 +1,79 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+dist/
+downloads/
+.eggs/
+*.egg-info/
+.installed.cfg
+pip-wheel-metadata/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+
+# Pytest
+.pytest_cache/
+
+# MyPy
+.mypy_cache/
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+
+# Environments
+.env
+.env.*
+.python-version
+
+# SQLite DBs
+*.sqlite3
+
+# Jupyter
+.ipynb_checkpoints
+
+# Docker
+docker-compose.override.yml
+*.log
+
+# VS Code
+.vscode/
+
+# JetBrains
+.idea/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Editor swap files
+*~
+*.swp
+
+# Ignore compiled assets, caches
+*.cache
+
+# Optional: keep secrets out of the repo
+secrets.yml
+
+# End of .gitignore
