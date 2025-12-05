@@ -1,0 +1,209 @@
+# Flask Specializations API - Development Log
+
+## Date: December 5, 2025
+
+### Session 1: Initial Project Review and Documentation
+
+**User Request:** Create a README file for this whole project
+
+**Actions Taken:**
+- Created comprehensive `README.md` with:
+  - Project overview and features
+  - Prerequisites and installation instructions
+  - Local and Docker run commands
+  - API endpoints documentation
+  - Project structure overview
+  - Example curl commands
+
+---
+
+### Session 2: Add Git Configuration
+
+**User Request:** Create a gitignore file
+
+**Actions Taken:**
+- Created `.gitignore` with entries for:
+  - Python bytecode and caches (`__pycache__/`, `*.pyc`)
+  - Virtual environments (`.venv/`, `venv/`, `env/`)
+  - IDEs (`.vscode/`, `.idea/`)
+  - Environment files (`.env`)
+  - SQLite databases (`*.sqlite3`)
+  - Docker logs
+  - OS-specific files (`.DS_Store`, `Thumbs.db`)
+
+---
+
+### Session 3: Code Review and Issue Identification
+
+**User Request:** Check all files and folders in this project and tell me what's wrong with my code
+
+**Issues Identified:**
+1. **Schema field naming mismatch** - Schemas used `course_item_id`/`specialization_id` but code expected `id`
+2. **Class naming conventions** - Classes used underscores instead of PascalCase
+3. **Update schema missing fields** - `CourseItemUpdateSchema` didn't include `specialization_id`
+4. **Duplicate implementations** - Both `app.py` routes and `resources/` blueprints existed
+5. **Input validation issues** - Missing `if not data` checks before accessing JSON keys
+6. **README formatting** - File wrapped in code fences preventing proper rendering
+
+---
+
+### Session 4: Comprehensive Project Audit
+
+**User Request:** Check all the folders and files in my project and tell me what this whole project does and if there's anything I should fix
+
+**Project Analysis:**
+- Flask REST API for managing educational specializations and course items
+- Uses Flask-Smorest for OpenAPI/Swagger documentation
+- SQLAlchemy ORM with SQLite persistence
+- Marshmallow schemas for validation
+- Docker support included
+
+**Critical Issues Found:**
+
+1. **TYPO in `models/course_items.py`**
+   - Field name `typr` instead of `type` on line 7
+   
+2. **TYPO in filename `models/specilization.py`**
+   - Missing 'a' in "specialization"
+   
+3. **Broken/Unused `models/` directory**
+   - Entire directory contained dead code
+   - Wrong class names and broken imports
+   - Conflicts with working models in `db.py`
+   
+4. **Missing `flask-sqlalchemy` in requirements.txt**
+   - App imports it but not listed as dependency
+   
+5. **Missing `FLASK_APP` in Dockerfile**
+   - Container would fail to start without env var
+   
+6. **Performance issue with `@app.before_request`**
+   - `db.create_all()` running on every single request
+   
+7. **Docker Compose filename case inconsistency**
+   - Named `Docker-compose.yml` instead of standard `docker-compose.yml`
+   
+8. **Schema naming convention violations**
+   - Used lowercase_with_underscores instead of PascalCase
+   
+9. **Missing validation in `course_item_update_schema`**
+   - Schema didn't include `specialization_id` field for updates
+   
+10. **`.gitignore` missing `.flaskvenv`**
+    - Directory exists but not excluded from git
+
+---
+
+### Session 5: Apply All Fixes
+
+**User Request:** Yes do all of that
+
+**Fixes Applied:**
+
+1. **Updated `requirements.txt`**
+   - Added `flask-sqlalchemy`
+   - Added `marshmallow` explicitly
+
+2. **Fixed `app.py` database initialization**
+   - Removed `@app.before_request` decorator
+   - Replaced with proper app context:
+     ```python
+     with app.app_context():
+         db.create_all()
+     ```
+
+3. **Fixed `Dockerfile`**
+   - Added `ENV FLASK_APP=app.py` before CMD
+
+4. **Updated `.gitignore`**
+   - Added `.flaskvenv/` to excluded directories
+
+5. **Rewrote `schemas.py`**
+   - Renamed all classes to PascalCase:
+     - `CourseItemSchema`
+     - `SpecializationSchema`
+     - `CourseItemUpdateSchema`
+     - `PlainCourseItemSchema`
+     - `PlainSpecializationSchema`
+   - Added `specialization_id` to `CourseItemUpdateSchema`
+   - Made all fields in update schema optional for partial updates
+   - Added backwards-compatible instances at bottom
+   - Fixed spacing and formatting
+
+6. **Renamed Docker Compose file**
+   - `Docker-compose.yml` → `docker-compose.yml` (lowercase)
+
+**Note:** User skipped deletion of `models/` directory (contains dead code)
+
+---
+
+### Session 6: Fix Schema Import Error
+
+**User Request:** TypeError: 'CourseItemSchema' object is not callable
+
+**Problem Identified:**
+- `schemas.py` created both class definitions AND instances
+- Resources files were importing instances but trying to call them as classes
+
+**Fixes Applied:**
+
+1. **Updated `resources/course_item.py`**
+   - Changed import from `course_item_schema, course_item_update_schema` to `CourseItemSchema, CourseItemUpdateSchema`
+   - Updated all decorators to use class names:
+     - `@blp.response(200, CourseItemSchema)`
+     - `@blp.arguments(CourseItemSchema)`
+     - `@blp.response(200, CourseItemSchema(many=True))`
+     - `@blp.arguments(CourseItemUpdateSchema)`
+
+2. **Updated `resources/specialization.py`**
+   - Changed import from `specialization_schema as Specialization_Schema` to `SpecializationSchema`
+   - Updated all decorators to use class name:
+     - `@blp.response(200, SpecializationSchema)`
+     - `@blp.arguments(SpecializationSchema)`
+     - `@blp.response(200, SpecializationSchema(many=True))`
+
+**Result:** Application now starts successfully without errors
+
+---
+
+## Summary of All Changes
+
+### Files Created:
+- `README.md` - Comprehensive project documentation
+- `.gitignore` - Git ignore rules for Python/Flask projects
+- `.logs` - This development history file
+
+### Files Modified:
+- `requirements.txt` - Added flask-sqlalchemy and marshmallow
+- `app.py` - Fixed database initialization performance issue
+- `Dockerfile` - Added FLASK_APP environment variable
+- `schemas.py` - Complete rewrite with proper naming and structure
+- `resources/course_item.py` - Fixed schema imports and usage
+- `resources/specialization.py` - Fixed schema imports and usage
+- `.gitignore` - Added .flaskvenv directory
+
+### Files Renamed:
+- `Docker-compose.yml` → `docker-compose.yml`
+
+### Outstanding Issues:
+- `models/` directory still exists with broken/unused code (recommended to delete)
+
+---
+
+## Current Project State
+
+**Status:** ✅ Fully functional
+
+**API Endpoints:**
+- GET/POST /specialization
+- GET/PUT/DELETE /specialization/<id>
+- GET/POST /course_item
+- GET/PUT/DELETE /course_item/<id>
+
+**Documentation:** Available at http://localhost:5000/swagger
+
+**Database:** SQLite at instance/data.db
+
+**Run Command:** `python app.py`
+
+**Docker Command:** `docker-compose up --build`

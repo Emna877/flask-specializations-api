@@ -1,8 +1,9 @@
 import uuid
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
+from flask_jwt_extended import jwt_required
 from db import db, SpecializationModel
-from schemas import specialization_schema as Specialization_Schema
+from schemas import SpecializationSchema
 
 
 blp = Blueprint("specializations", __name__, description="Operations on specializations")
@@ -10,13 +11,15 @@ blp = Blueprint("specializations", __name__, description="Operations on speciali
 
 @blp.route("/specialization/<string:specialization_id>")
 class Specialization(MethodView):
-    @blp.response(200, Specialization_Schema)
+    @blp.response(200, SpecializationSchema)
     def get(self, specialization_id):
         specialization = SpecializationModel.query.get_or_404(specialization_id)
         return specialization
     
-    @blp.arguments(Specialization_Schema)
-    @blp.response(200, Specialization_Schema)
+    @blp.arguments(SpecializationSchema)
+    @blp.response(200, SpecializationSchema)
+    @blp.doc(security=[{"bearerAuth": []}])
+    @jwt_required()
     def put(self, specialization_data, specialization_id):
         specialization = SpecializationModel.query.get_or_404(specialization_id)
         
@@ -25,6 +28,8 @@ class Specialization(MethodView):
         db.session.commit()
         return specialization
 
+    @blp.doc(security=[{"bearerAuth": []}])
+    @jwt_required()
     def delete(self, specialization_id):
         specialization = SpecializationModel.query.get_or_404(specialization_id)
         db.session.delete(specialization)
@@ -34,12 +39,14 @@ class Specialization(MethodView):
 
 @blp.route("/specialization")
 class SpecializationList(MethodView):
-    @blp.response(200, Specialization_Schema(many=True))
+    @blp.response(200, SpecializationSchema(many=True))
     def get(self):
         return SpecializationModel.query.all()
 
-    @blp.arguments(Specialization_Schema)
-    @blp.response(201, Specialization_Schema)
+    @blp.arguments(SpecializationSchema)
+    @blp.response(201, SpecializationSchema)
+    @blp.doc(security=[{"bearerAuth": []}])
+    @jwt_required()
     def post(self, specialization_data):
         # Check for duplicate
         if SpecializationModel.query.filter_by(name=specialization_data["name"]).first():

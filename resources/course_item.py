@@ -1,7 +1,7 @@
 import uuid
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
-from schemas import course_item_schema, course_item_update_schema
+from schemas import CourseItemSchema, CourseItemUpdateSchema
 from db import db, CourseItemModel, SpecializationModel
 
 
@@ -10,7 +10,7 @@ blp = Blueprint("Course_Items", __name__, description="Operations on course_item
 
 @blp.route("/course_item/<string:course_item_id>")
 class Course_Item(MethodView):
-    @blp.response(200, course_item_schema)
+    @blp.response(200, CourseItemSchema)
     def get(self, course_item_id):
         course_item = CourseItemModel.query.get_or_404(course_item_id)
         return course_item
@@ -21,8 +21,8 @@ class Course_Item(MethodView):
         db.session.commit()
         return {"message": "Course_item deleted."}
 
-    @blp.arguments(course_item_update_schema)
-    @blp.response(200, course_item_update_schema)
+    @blp.arguments(CourseItemUpdateSchema)
+    @blp.response(200, CourseItemUpdateSchema)
     def put(self, course_item_data, course_item_id):
         course_item = CourseItemModel.query.get_or_404(course_item_id)
         
@@ -36,12 +36,12 @@ class Course_Item(MethodView):
 
 @blp.route("/course_item")
 class Course_ItemList(MethodView):
-    @blp.response(200, course_item_schema(many=True))
+    @blp.response(200, CourseItemSchema(many=True))
     def get(self):
         return CourseItemModel.query.all()
    
-    @blp.arguments(course_item_schema)
-    @blp.response(201, course_item_schema)
+    @blp.arguments(CourseItemSchema)
+    @blp.response(201, CourseItemSchema)
     def post(self, course_item_data):
         # Check if specialization exists
         specialization = SpecializationModel.query.get(course_item_data["specialization_id"])

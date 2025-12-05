@@ -1,23 +1,36 @@
 from marshmallow import Schema, fields
 
-class plain_course_item_schema(Schema):
-    id=fields.Str(dump_only=True)
-    name=fields.Str(required=True)
-    type=fields.Str(required=True)
-    specialization_id=fields.Str(required=True)
+class PlainCourseItemSchema(Schema):
+    id = fields.Str(dump_only=True)
+    name = fields.Str(required=True)
+    type = fields.Str(required=True)
+    specialization_id = fields.Str(required=True)
 
-class plain_specialization_schema(Schema):
-    id=fields.Str(dump_only=True)
-    name=fields.Str(required=True)
+class PlainSpecializationSchema(Schema):
+    id = fields.Str(dump_only=True)
+    name = fields.Str(required=True)
 
-class course_item_update_schema(Schema):
-    name=fields.Str(required=True)
-    type=fields.Str(required=True)
-   
+class CourseItemUpdateSchema(Schema):
+    name = fields.Str()
+    type = fields.Str()
+    specialization_id = fields.Str()
 
-class course_item_schema(plain_course_item_schema):
-    specialization=fields.Nested(plain_specialization_schema, dump_only=True)
+class CourseItemSchema(PlainCourseItemSchema):
+    specialization = fields.Nested(PlainSpecializationSchema, dump_only=True)
 
+class SpecializationSchema(PlainSpecializationSchema):
+    course_items = fields.List(fields.Nested(PlainCourseItemSchema), dump_only=True)
 
-class specialization_schema(plain_specialization_schema):
-    course_items=fields.Nested(plain_course_item_schema, many=True)
+# User schemas for authentication
+class UserSchema(Schema):
+    id = fields.Int(dump_only=True)
+    username = fields.Str(required=True)
+
+class UserRegisterSchema(Schema):
+    username = fields.Str(required=True)
+    password = fields.Str(required=True, load_only=True)
+
+# Backwards compatibility - create lowercase instances
+course_item_schema = CourseItemSchema()
+specialization_schema = SpecializationSchema()
+course_item_update_schema = CourseItemUpdateSchema()
